@@ -2,6 +2,7 @@
 #include "uLCD_4DGL.h"
 #define ARROWMAX 3
 #define ARROWMIN 0
+#define Ratio (0.91)
 
 uLCD_4DGL uLCD(D1, D0, D2);
 
@@ -9,17 +10,41 @@ InterruptIn upBtn(D11);
 InterruptIn dwBtn(D9);
 InterruptIn selBtn(D10);
 //DigitalOut led1(LED1);
+AnalogOut Aout(PA_4);
+AnalogIn Ain(A0);
 
 int arrow = ARROWMAX;
 
 EventQueue queue(32 * EVENTS_EVENT_SIZE);
 Thread t;
 
+float ADCdata[1000];
+//Arrow
+//3  2   1   0
+//1 1/2 1/4 1/8
+//
 
 void menuArrowUpdate();
 void genWave()
 {
+    int id = 0;
+
     printf("selBtn\n");
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 120; j++) {
+            if (j < 40) {
+                Aout = Ratio * (j * 0.025);
+            } else if (j < 80) {
+                Aout = Ratio * 1;
+            } else if (j < 120) {
+                Aout = Ratio * (1 - (j - 80) * 0.025);
+            }
+            ADCdata[id] = Ain;
+            id++;
+            ThisThread::sleep_for(2ms);
+        } 
+    }
+    printf("max data %d\n", id);
 }
 
 void arrowUp()

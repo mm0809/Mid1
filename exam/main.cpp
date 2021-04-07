@@ -4,6 +4,8 @@
 #define ARROWMIN 0
 #define Ratio (0.91)
 
+using namespace std::chrono;
+
 uLCD_4DGL uLCD(D1, D0, D2);
 
 InterruptIn upBtn(D11);
@@ -12,6 +14,8 @@ InterruptIn selBtn(D10);
 //DigitalOut led1(LED1);
 AnalogOut Aout(PA_4);
 AnalogIn Ain(A0);
+
+Timer debounce;                  //define debounce timer
 
 int arrow = ARROWMAX;
 
@@ -72,6 +76,35 @@ void arrowDw()
     if(arrow != ARROWMIN) arrow--;
     queue.call(menuArrowUpdate);
 }
+void arrowUpGuard()
+{
+   if (duration_cast<milliseconds>(debounce.elapsed_time()).count() > 300)
+   {
+      arrowUp();
+      debounce.reset(); //restart timer when the toggle is performed
+   }
+
+}
+void arrowDwGuard()
+{
+   if (duration_cast<milliseconds>(debounce.elapsed_time()).count() > 300)
+   {
+      arrowDw();
+      debounce.reset(); //restart timer when the toggle is performed
+   }
+
+}
+void genWaveGuard()
+{
+   if (duration_cast<milliseconds>(debounce.elapsed_time()).count() > 300)
+   {
+       genWave();
+      debounce.reset(); //restart timer when the toggle is performed
+   }
+
+}
+
+
 void menuArrowUpdate()
 {
     int yPos = 1;
@@ -100,11 +133,13 @@ int main() {
 
     t.start(callback(&queue, &EventQueue::dispatch_forever));
     tSample.start(callback(&queueSample, &EventQueue::dispatch_forever));
-    upBtn.rise(&arrowUp);
-    dwBtn.rise(&arrowDw);
-    selBtn.rise(queue.event(genWave));
+
+    upBtn.rise(&arrowUpGuard);
+    dwBtn.rise(&arrowDwGuard);
+    selBtn.rise(queue.event(genWaveGuard));
 
     while (1){
+        debounce.start();
         //menuArrowUpdate();
         ThisThread::sleep_for(100ms);
         

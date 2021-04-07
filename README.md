@@ -24,4 +24,5 @@ $ sudo python3 FFT.py
 |**picoscope**|![](exam/IMG/1.png)|![](exam/IMG/1-2.png)|![](exam/IMG/1-4.png)|![](exam/IMG/1-8.png)|
 |**FFT**      |![](exam/FFTIMG/1.png)|![](exam/FFTIMG/1-2.png)|![](exam/FFTIMG/1-4.png)|![](exam/FFTIMG/1-8.png)|
 
-
+## breakboard
+![](exam/IMG/pin.jpg)

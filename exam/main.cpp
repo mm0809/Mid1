@@ -12,16 +12,25 @@ InterruptIn selBtn(D10);
 
 int arrow = ARROWMAX;
 
+EventQueue queue(32 * EVENTS_EVENT_SIZE);
+Thread t;
 
 
+void menuArrowUpdate();
+void genWave()
+{
+    printf("selBtn\n");
+}
 
 void arrowUp()
 {
     if(arrow != ARROWMAX) arrow++;
+    queue.call(menuArrowUpdate);
 }
 void arrowDw()
 {
     if(arrow != ARROWMIN) arrow--;
+    queue.call(menuArrowUpdate);
 }
 void menuArrowUpdate()
 {
@@ -49,10 +58,13 @@ int main() {
     uLCD.printf("%s", "1/8");
     menuArrowUpdate();
 
+    t.start(callback(&queue, &EventQueue::dispatch_forever));
     upBtn.rise(&arrowUp);
     dwBtn.rise(&arrowDw);
+    selBtn.rise(queue.event(genWave));
+
     while (1){
-        menuArrowUpdate();
+        //menuArrowUpdate();
         ThisThread::sleep_for(100ms);
         
         //if (upBtn.read()) {

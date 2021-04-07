@@ -30,12 +30,17 @@ int jId1[4] = {5, 10, 20, 40};
 int jId2[4] = {115, 110, 100, 80};
 float unit[4] = {0.2,0.1,0.05,0.025};
 
+void Sample(int id)
+{
+    ADCdata[id] = Ain;
+}
+
 void menuArrowUpdate();
 void genWave()
 {
     int id = 0;
 
-    printf("selBtn\n");
+    printf("500\n");
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 120; j++) {
             if (j < jId1[arrow]) {
@@ -45,12 +50,16 @@ void genWave()
             } else {
                 Aout = Ratio * (1 - (j - jId2[arrow]) * unit[arrow]);
             }
-            ADCdata[id] = Ain;
+            queueSample.call(Sample, id);
             id++;
             ThisThread::sleep_for(2ms);
         } 
     }
-    printf("max data %d\n", id);
+    Aout = 0;
+    for (int i = 0; i < 500; i++) {
+        printf("%f\n", ADCdata[i]);
+    }
+    //printf("max data %d\n", id);
 }
 
 void arrowUp()

@@ -16,13 +16,19 @@ AnalogIn Ain(A0);
 int arrow = ARROWMAX;
 
 EventQueue queue(32 * EVENTS_EVENT_SIZE);
-Thread t;
+Thread t(osPriorityLow);
+
+EventQueue queueSample(32 * EVENTS_EVENT_SIZE);
+Thread tSample(osPriorityNormal);
 
 float ADCdata[1000];
 //Arrow
 //3  2   1   0
 //1 1/2 1/4 1/8
 //
+int jId1[4] = {5, 10, 20, 40};
+int jId2[4] = {115, 110, 100, 80};
+float unit[4] = {0.2,0.1,0.05,0.025};
 
 void menuArrowUpdate();
 void genWave()
@@ -32,12 +38,12 @@ void genWave()
     printf("selBtn\n");
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 120; j++) {
-            if (j < 40) {
-                Aout = Ratio * (j * 0.025);
-            } else if (j < 80) {
+            if (j < jId1[arrow]) {
+                Aout = Ratio * (j * unit[arrow]);
+            } else if (j < jId2[arrow]) {
                 Aout = Ratio * 1;
-            } else if (j < 120) {
-                Aout = Ratio * (1 - (j - 80) * 0.025);
+            } else {
+                Aout = Ratio * (1 - (j - jId2[arrow]) * unit[arrow]);
             }
             ADCdata[id] = Ain;
             id++;
@@ -84,6 +90,7 @@ int main() {
     menuArrowUpdate();
 
     t.start(callback(&queue, &EventQueue::dispatch_forever));
+    tSample.start(callback(&queueSample, &EventQueue::dispatch_forever));
     upBtn.rise(&arrowUp);
     dwBtn.rise(&arrowDw);
     selBtn.rise(queue.event(genWave));
